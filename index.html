@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parasite quiz and cards</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<style>
+:root{
+  --bg:#EEF1EF; --card:#FFFFFF; --ink:#16201D; --muted:#56635E; --line:#D3DAD6;
+  --hl:#FFE27A; --hl-ink:#3A2E00;
+  --ok:#256B43; --okbg:#E1F1E7; --bad:#A63A34; --badbg:#FAE4E2; --grey:#E3E7E5;
+  --nem:#2F6690; --pro:#9A3B52; --ces:#7A5A14; --bac:#2F7352;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121816; --card:#1B2320; --ink:#E7EDEA; --muted:#A3B0AB; --line:#33403B;
+    --hl:#E8C547; --hl-ink:#1E1800;
+    --ok:#7CCB9C; --okbg:#1D3327; --bad:#EE9A93; --badbg:#3A2220; --grey:#28322E;
+    --nem:#8DB9DD; --pro:#E39AAE; --ces:#D9B45E; --bac:#86CDA8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121816; --card:#1B2320; --ink:#E7EDEA; --muted:#A3B0AB; --line:#33403B;
+  --hl:#E8C547; --hl-ink:#1E1800;
+  --ok:#7CCB9C; --okbg:#1D3327; --bad:#EE9A93; --badbg:#3A2220; --grey:#28322E;
+  --nem:#8DB9DD; --pro:#E39AAE; --ces:#D9B45E; --bac:#86CDA8;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Source Sans 3',Arial,sans-serif;font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 64px}
+h1{font-family:'Bricolage Grotesque',Arial,sans-serif;font-weight:800;font-size:clamp(34px,6vw,48px);line-height:1.05;margin:0 0 8px;letter-spacing:-0.02em}
+.lede{color:var(--muted);margin:0 0 24px;max-width:60ch}
+.tabs{display:flex;gap:24px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.tab{background:none;border:0;padding:10px 2px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--nem);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;color:var(--muted);font-size:15px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.plain{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 14px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;min-height:300px;cursor:pointer;display:flex;flex-direction:column;justify-content:center}
+.tag{display:inline-block;font-size:14px;font-weight:600;padding:2px 10px;border-radius:6px;border:1px solid currentColor;margin-bottom:12px;align-self:flex-start}
+.g-nem{color:var(--nem)} .g-pro{color:var(--pro)} .g-ces{color:var(--ces)} .g-bac{color:var(--bac)}
+.sp{font-family:'Bricolage Grotesque',Arial,sans-serif;font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0}
+.sp i{font-style:italic}
+.common{color:var(--muted);margin:6px 0 0}
+.hint{color:var(--muted);font-size:14px;margin-top:24px;text-align:center}
+dl{display:grid;grid-template-columns:150px 1fr;gap:8px 16px;margin:18px 0 0}
+dt{color:var(--muted);font-weight:600}
+dd{margin:0}
+.top{display:flex;gap:18px;align-items:center;justify-content:space-between}
+.fig{margin:0;text-align:center;flex:none}
+.fig .micro{width:140px;height:140px;display:block}
+.fig figcaption{font-size:13px;color:var(--muted);max-width:150px;margin-top:4px}
+.clues .fig{float:right;margin:0 0 8px 16px}
+@media (max-width:560px){.top{flex-direction:column;align-items:flex-start}.clues .fig{float:none;margin:0 auto 12px}}
+.lab{margin-top:16px;padding:10px 14px;border-left:4px solid var(--hl);background:color-mix(in srgb,var(--hl) 18%,transparent);font-size:15px}
+.clues p{margin:0 0 10px;font-size:20px}
+.clues b{color:var(--muted);font-weight:600;font-size:15px;display:block}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.again{background:var(--badbg);color:var(--bad);border:1px solid var(--bad);border-radius:10px;padding:14px;font-weight:600;cursor:pointer}
+.know{background:var(--okbg);color:var(--ok);border:1px solid var(--ok);border-radius:10px;padding:14px;font-weight:600;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:16px}
+.stats div{padding:12px 16px;border-left:1px solid var(--line)} .stats div:first-child{border-left:0}
+.stats strong{font-family:'Bricolage Grotesque',Arial,sans-serif;font-size:26px;display:block;line-height:1.1}
+.stats span{color:var(--muted);font-size:14px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+.q h2{font-size:20px;line-height:1.35;margin:10px 0 16px;font-weight:600}
+.clue{display:block;font-weight:400;color:var(--muted);font-size:17px;margin-top:4px}
+.clue mark{background:var(--hl);color:var(--hl-ink);padding:0 4px;border-radius:4px}
+.opt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.opt .k{color:var(--muted);font-size:14px;width:14px}
+.opt.right{background:var(--okbg);border-color:var(--ok)} .opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default;opacity:1}
+.fb{margin-top:10px;font-size:16px} .fb b.r{color:var(--ok)} .fb b.w{color:var(--bad)}
+.next{margin-top:12px;background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:600}
+h3{font-family:'Bricolage Grotesque',Arial,sans-serif;font-size:20px;margin:32px 0 4px}
+.sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+.gridwrap{overflow-x:auto}
+table.grid{border-collapse:separate;border-spacing:4px;width:100%;min-width:480px}
+.grid th{font-size:13px;color:var(--muted);font-weight:600;text-align:left;padding:4px}
+.grid td{border-radius:8px;padding:8px 10px;font-size:14px;background:var(--grey);color:var(--muted);text-align:center}
+.grid td.n{background:none;text-align:left;color:var(--ink);padding-left:0}
+.grid td.good{background:var(--okbg);color:var(--ok);font-weight:600}
+.grid td.poor{background:var(--badbg);color:var(--bad);font-weight:600}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px;color:var(--muted);font-size:14px;align-items:center}
+.note{color:var(--muted);font-size:14px;margin-top:28px}
+.done{text-align:center;padding:40px 20px}
+@media (max-width:560px){dl{grid-template-columns:1fr;gap:2px}dd{margin-bottom:8px}.card{padding:20px}}
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s}.card:active{transform:scale(.99)}}
+
+/* --- fancy cards --- */
+.scene{perspective:1600px}
+.flipper{display:grid;position:relative;transition:transform .6s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d;cursor:pointer}
+.flipper.on{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;position:relative;overflow:hidden;min-height:340px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 10px 30px -18px rgba(0,0,0,.45)}
+.face.back{transform:rotateY(180deg);justify-content:flex-start;position:absolute;inset:0 auto auto 0;width:100%;height:100%;overflow:hidden}
+.flipper.sb .face.back{position:relative;height:auto}.flipper.sb .face.front{position:absolute;inset:0 auto auto 0;width:100%;height:100%}
+.namefig{text-align:center;margin:0 0 10px}.namefig .micro{width:180px;height:180px;display:inline-block}
+.face::before{content:"";position:absolute;inset:0 0 auto 0;height:8px;background:linear-gradient(90deg,var(--gc),color-mix(in srgb,var(--gc) 35%,transparent))}
+.face::after{content:"";position:absolute;right:-60px;bottom:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--gc) 16%,transparent),transparent 70%);pointer-events:none}
+.gc-nem{--gc:var(--nem)}.gc-pro{--gc:var(--pro)}.gc-ces{--gc:var(--ces)}.gc-bac{--gc:var(--bac)}
+.front .bigfig .micro{width:170px;height:170px}
+.front .bigfig{float:right;margin:0 0 6px 16px}
+.tipbox{margin-top:14px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--gc) 12%,transparent);border:1px dashed color-mix(in srgb,var(--gc) 60%,transparent);font-size:15px}
+.tipbox b{color:var(--gc)}
+.actions[hidden]{display:none}
+.ring{--p:0;width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--grey) 0);display:grid;place-items:center;flex:none}
+.ring span{width:42px;height:42px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink)}
+.prog{display:flex;align-items:center;gap:12px}
+.level{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:600;margin-bottom:14px}
+.burst{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9}
+.burst span{position:absolute;top:-40px;font-size:28px;animation:fall 2.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.pop{animation:pop .5s ease}@keyframes pop{40%{transform:scale(1.25)}}
+/* look-alikes */
+.pairnav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;overflow:hidden}
+.mini::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--gc)}
+.mini .micro{width:120px;height:120px;display:block;margin:6px auto 8px}
+.mini h4{font-family:'Bricolage Grotesque',Arial,sans-serif;font-size:21px;margin:0;text-align:center}
+.mini .row{border-top:1px solid var(--line);padding:8px 2px;font-size:14.5px;transition:background .3s}
+.mini .row b{display:block;color:var(--muted);font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.mini .row.diff{background:color-mix(in srgb,var(--hl) 35%,transparent);border-radius:8px}
+.pairq{margin-top:14px;font-size:17px}
+@media (max-width:560px){.pair{grid-template-columns:1fr}.front .bigfig{float:none;margin:0 auto 10px}}
+@media (prefers-reduced-motion:reduce){.flipper{transition:none}.burst{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Parasite quiz and cards</h1>
+  <p class="lede">Start with the seven hard questions, then learn with the cards. Everything is in this one page; your progress stays in this browser.</p>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-challenge" aria-selected="true">Quiz</button>
+    <button class="tab" role="tab" id="tab-cards" aria-selected="false">Cards</button>
+    <button class="tab" role="tab" id="tab-pairs" aria-selected="false">Look-alikes</button>
+    <button class="tab" role="tab" id="tab-quiz" aria-selected="false">Practice</button>
+  </div>
+  <section id="challenge"><iframe id="qframe" title="Seven-question parasite quiz" style="width:100%;border:0;height:900px;display:block;background:transparent" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
+&lt;title&gt;Parasite quiz: 7 questions&lt;/title&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;display=swap&quot;&gt;
+&lt;style&gt;
+:root{
+  --bg:#EEF1EF; --card:#FFFFFF; --ink:#16201D; --muted:#56635E; --line:#D3DAD6;
+  --hl:#FFE27A; --ok:#256B43; --okbg:#E1F1E7; --bad:#A63A34; --badbg:#FAE4E2; --dot:#CBD3CF; --accent:#2F6690;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme=&quot;light&quot;]){--bg:#121816;--card:#1B2320;--ink:#E7EDEA;--muted:#A3B0AB;--line:#33403B;--hl:#E8C547;--ok:#7CCB9C;--okbg:#1D3327;--bad:#EE9A93;--badbg:#3A2220;--dot:#3A4843;--accent:#8DB9DD}}
+:root[data-theme=&quot;dark&quot;]{--bg:#121816;--card:#1B2320;--ink:#E7EDEA;--muted:#A3B0AB;--line:#33403B;--hl:#E8C547;--ok:#7CCB9C;--okbg:#1D3327;--bad:#EE9A93;--badbg:#3A2220;--dot:#3A4843;--accent:#8DB9DD}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:&#x27;Source Sans 3&#x27;,Arial,sans-serif;font-size:18px;line-height:1.5}
+.wrap{max-width:560px;margin:0;padding:0 0 12px}
+h1{font-family:&#x27;Bricolage Grotesque&#x27;,Arial,sans-serif;font-weight:800;font-size:34px;line-height:1.05;margin:0 0 6px;letter-spacing:-0.02em}
+.lede{color:var(--muted);margin:0 0 18px}
+.dots{display:flex;gap:6px;margin-bottom:14px}
+.dots span{flex:1;height:8px;border-radius:4px;background:var(--dot)}
+.dots .r{background:var(--ok)} .dots .w{background:var(--bad)} .dots .c{background:var(--ink)}
+.q{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px}
+.num{color:var(--muted);font-size:15px}
+.q h2{font-size:21px;line-height:1.3;margin:6px 0 14px;font-weight:600}
+.q h2 i{font-style:italic}
+figure{margin:0 auto 14px;text-align:center}
+.micro{width:190px;height:190px;display:block;margin:0 auto}
+figcaption{color:var(--muted);font-size:13px;margin-top:6px}
+.opt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);color:var(--ink);font:inherit;border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:8px;cursor:pointer;min-height:52px}
+.opt .k{color:var(--muted);font-size:14px;width:14px;flex:none}
+.opt.right{background:var(--okbg);border-color:var(--ok)} .opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fb{margin:10px 0 0;font-size:17px} .fb b.r{color:var(--ok)} .fb b.w{color:var(--bad)}
+.btn{display:inline-block;margin-top:14px;background:var(--ink);color:var(--bg);border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line);margin-left:8px}
+.end{text-align:center;padding:28px 20px}
+.big{font-size:64px;line-height:1.1;margin:0}
+.score{font-family:&#x27;Bricolage Grotesque&#x27;,Arial,sans-serif;font-weight:800;font-size:56px;margin:8px 0 0}
+.msg{font-size:20px;margin:6px 0 4px}
+.tip{color:var(--muted);margin:0 0 6px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.confetti span{position:absolute;top:-40px;font-size:28px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.big.wob{display:inline-block;animation:wobble 1.2s ease-in-out 3}
+@media (prefers-reduced-motion:reduce){.confetti{display:none}.big.wob{animation:none}}
+.note{color:var(--muted);font-size:13px;margin-top:22px;text-align:center}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;wrap&quot;&gt;
+  
+  &lt;p class=&quot;lede&quot;&gt;Seven hard questions about the parasites of dogs and jackals. Experts only. Or brave beginners.&lt;/p&gt;
+  &lt;div class=&quot;dots&quot; id=&quot;dots&quot;&gt;&lt;/div&gt;
+  &lt;main id=&quot;app&quot;&gt;&lt;/main&gt;
+  &lt;p class=&quot;note&quot;&gt;The microscope pictures are drawings for teaching, not real micrographs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;confetti&quot; id=&quot;confetti&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+/* Microscopy-style drawings (illustrations, not real micrographs) */
+let MID=0;
+function R(s){let x=s%2147483647||1;return()=&gt;(x=x*16807%2147483647)/2147483647;}
+function rbc(x,y,r){return `&lt;circle cx=&quot;${x.toFixed(1)}&quot; cy=&quot;${y.toFixed(1)}&quot; r=&quot;${r.toFixed(1)}&quot; fill=&quot;#E7A3AF&quot; stroke=&quot;#C98492&quot; stroke-width=&quot;1&quot;/&gt;&lt;circle cx=&quot;${x.toFixed(1)}&quot; cy=&quot;${y.toFixed(1)}&quot; r=&quot;${(r*.42).toFixed(1)}&quot; fill=&quot;#F2C6CE&quot;/&gt;`;}
+function spots(seed,n,minR,maxR,skip){const r=R(seed),pts=[];for(let i=0;i&lt;n*8&amp;&amp;pts.length&lt;n;i++){const x=r()*200,y=r()*200,rad=minR+r()*(maxR-minR);if(skip&amp;&amp;skip(x,y))continue;if(pts.some(p=&gt;Math.hypot(p[0]-x,p[1]-y)&lt;(rad+p[2])*1.05))continue;pts.push([x,y,rad]);}return pts;}
+function blood(seed,skip){return spots(seed,30,10,13,skip).map(p=&gt;rbc(...p)).join(&#x27;&#x27;);}
+function debris(seed,col){return spots(seed,26,1,3).map(p=&gt;`&lt;circle cx=&quot;${p[0].toFixed(1)}&quot; cy=&quot;${p[1].toFixed(1)}&quot; r=&quot;${p[2].toFixed(1)}&quot; fill=&quot;${col}&quot; opacity=&quot;.45&quot;/&gt;`).join(&#x27;&#x27;);}
+const far=(cx,cy,d)=&gt;(x,y)=&gt;Math.hypot(x-cx,y-cy)&lt;d;
+function frame(bg,inner,label){const id=&#x27;m&#x27;+(++MID);return `&lt;svg viewBox=&quot;0 0 200 200&quot; role=&quot;img&quot; aria-label=&quot;${label}&quot; class=&quot;micro&quot;&gt;&lt;defs&gt;&lt;clipPath id=&quot;${id}&quot;&gt;&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;94&quot;/&gt;&lt;/clipPath&gt;&lt;radialGradient id=&quot;${id}v&quot; cx=&quot;50%&quot; cy=&quot;50%&quot; r=&quot;50%&quot;&gt;&lt;stop offset=&quot;72%&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;0&quot;/&gt;&lt;stop offset=&quot;100%&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;.32&quot;/&gt;&lt;/radialGradient&gt;&lt;/defs&gt;&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;99&quot; fill=&quot;#1E2422&quot;/&gt;&lt;g clip-path=&quot;url(#${id})&quot;&gt;&lt;rect width=&quot;200&quot; height=&quot;200&quot; fill=&quot;${bg}&quot;/&gt;${inner}&lt;rect width=&quot;200&quot; height=&quot;200&quot; fill=&quot;url(#${id}v)&quot;/&gt;&lt;/g&gt;&lt;/svg&gt;`;}
+function morula(x,y,seed){const r=R(seed);let o=&#x27;&#x27;;for(let i=0;i&lt;8;i++)o+=`&lt;circle cx=&quot;${(x+(r()-.5)*9).toFixed(1)}&quot; cy=&quot;${(y+(r()-.5)*9).toFixed(1)}&quot; r=&quot;2.3&quot; fill=&quot;#4A2A7E&quot;/&gt;`;return o;}
+function neut(x,y,s){return `&lt;circle cx=&quot;${x}&quot; cy=&quot;${y}&quot; r=&quot;${s}&quot; fill=&quot;#E6DDEE&quot; stroke=&quot;#BBAACD&quot; stroke-width=&quot;1.5&quot;/&gt;&lt;circle cx=&quot;${x-s*.35}&quot; cy=&quot;${y-s*.2}&quot; r=&quot;${s*.28}&quot; fill=&quot;#6A4C9C&quot;/&gt;&lt;circle cx=&quot;${x+s*.05}&quot; cy=&quot;${y-s*.42}&quot; r=&quot;${s*.26}&quot; fill=&quot;#6A4C9C&quot;/&gt;&lt;circle cx=&quot;${x+s*.4}&quot; cy=&quot;${y-s*.05}&quot; r=&quot;${s*.28}&quot; fill=&quot;#6A4C9C&quot;/&gt;`;}
+const MICRO={
+  dimm:()=&gt;frame(&#x27;#F6E4E8&#x27;,blood(11)+`&lt;path d=&quot;M18 132 C50 70 85 160 118 104 S168 80 184 94&quot; fill=&quot;none&quot; stroke=&quot;#6E4FA3&quot; stroke-width=&quot;6&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M184 94 q7 5 9 12&quot; fill=&quot;none&quot; stroke=&quot;#6E4FA3&quot; stroke-width=&quot;2.6&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M24 124 C52 72 86 158 118 104 S166 82 180 93&quot; fill=&quot;none&quot; stroke=&quot;#3E2670&quot; stroke-width=&quot;2.6&quot; stroke-dasharray=&quot;1.6 2.4&quot;/&gt;`,&#x27;Drawing: microfilaria in a blood smear&#x27;),
+  drep:()=&gt;frame(&#x27;#E7ECF1&#x27;,debris(12,&#x27;#8C97A6&#x27;)+`&lt;path d=&quot;M22 60 C70 40 90 120 130 110 S170 150 160 170&quot; fill=&quot;none&quot; stroke=&quot;#6E4FA3&quot; stroke-width=&quot;6.5&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M160 170 q-2 10 -12 10&quot; fill=&quot;none&quot; stroke=&quot;#6E4FA3&quot; stroke-width=&quot;2.6&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M28 58 C72 42 92 118 130 108 S166 146 159 164&quot; fill=&quot;none&quot; stroke=&quot;#3E2670&quot; stroke-width=&quot;2.6&quot; stroke-dasharray=&quot;1.6 2.4&quot;/&gt;`,&quot;Drawing: microfilaria in a Knott&#x27;s test&quot;),
+  linf:()=&gt;{const r=R(21);let a=&#x27;&#x27;;const pts=[];for(let i=0;i&lt;200&amp;&amp;pts.length&lt;16;i++){const ang=r()*6.283,d=Math.sqrt(r())*46,x=100+Math.cos(ang)*d,y=104+Math.sin(ang)*d;if(Math.hypot((x-112)/24,(y-80)/18)&lt;1)continue;if(pts.some(p=&gt;Math.hypot(p[0]-x,p[1]-y)&lt;12))continue;pts.push([x,y]);const rot=(r()*180).toFixed(0);a+=`&lt;g transform=&quot;rotate(${rot} ${x.toFixed(1)} ${y.toFixed(1)})&quot;&gt;&lt;ellipse cx=&quot;${x.toFixed(1)}&quot; cy=&quot;${y.toFixed(1)}&quot; rx=&quot;6&quot; ry=&quot;4&quot; fill=&quot;#B9A9DA&quot; stroke=&quot;#7A62B5&quot; stroke-width=&quot;1&quot;/&gt;&lt;circle cx=&quot;${(x-1.5).toFixed(1)}&quot; cy=&quot;${y.toFixed(1)}&quot; r=&quot;1.9&quot; fill=&quot;#4A2D84&quot;/&gt;&lt;rect x=&quot;${(x+2).toFixed(1)}&quot; y=&quot;${(y-.6).toFixed(1)}&quot; width=&quot;2.4&quot; height=&quot;1.2&quot; fill=&quot;#24124D&quot;/&gt;&lt;/g&gt;`;}
+    return frame(&#x27;#F4E8EC&#x27;,blood(23,far(100,104,64))+`&lt;circle cx=&quot;100&quot; cy=&quot;104&quot; r=&quot;58&quot; fill=&quot;#D4DCEF&quot; stroke=&quot;#A7B3D4&quot; stroke-width=&quot;2&quot;/&gt;&lt;ellipse cx=&quot;112&quot; cy=&quot;80&quot; rx=&quot;20&quot; ry=&quot;14&quot; fill=&quot;#5E4C9E&quot;/&gt;`+a,&#x27;Drawing: macrophage full of Leishmania amastigotes&#x27;);},
+  bcan:()=&gt;{let o=&#x27;&#x27;;[[62,70],[132,64],[96,128],[150,138]].forEach(([x,y])=&gt;{o+=rbc(x,y,18)+`&lt;ellipse cx=&quot;${x-5}&quot; cy=&quot;${y+1}&quot; rx=&quot;8&quot; ry=&quot;3.6&quot; transform=&quot;rotate(-35 ${x-5} ${y+1})&quot; fill=&quot;#7A5DB0&quot;/&gt;&lt;ellipse cx=&quot;${x+5}&quot; cy=&quot;${y+1}&quot; rx=&quot;8&quot; ry=&quot;3.6&quot; transform=&quot;rotate(35 ${x+5} ${y+1})&quot; fill=&quot;#7A5DB0&quot;/&gt;&lt;circle cx=&quot;${x-9}&quot; cy=&quot;${y+5}&quot; r=&quot;2&quot; fill=&quot;#3E2670&quot;/&gt;&lt;circle cx=&quot;${x+9}&quot; cy=&quot;${y+5}&quot; r=&quot;2&quot; fill=&quot;#3E2670&quot;/&gt;`;});
+    return frame(&#x27;#F6E4E8&#x27;,blood(31,(x,y)=&gt;[[62,70],[132,64],[96,128],[150,138]].some(([a,b])=&gt;Math.hypot(x-a,y-b)&lt;30))+o,&#x27;Drawing: paired pear-shaped Babesia in red blood cells&#x27;);},
+  hcan:()=&gt;frame(&#x27;#F6E4E8&#x27;,blood(41,far(100,100,40))+neut(100,100,30)+`&lt;rect x=&quot;82&quot; y=&quot;104&quot; width=&quot;38&quot; height=&quot;14&quot; rx=&quot;7&quot; fill=&quot;#C6D3EA&quot; stroke=&quot;#8C9FC6&quot; stroke-width=&quot;1.2&quot;/&gt;&lt;ellipse cx=&quot;101&quot; cy=&quot;111&quot; rx=&quot;7&quot; ry=&quot;4&quot; fill=&quot;#7C8FBF&quot;/&gt;`,&#x27;Drawing: Hepatozoon gamont inside a neutrophil&#x27;),
+  egra:()=&gt;{let o=&#x27;&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;42&quot; fill=&quot;#C8A263&quot;/&gt;&#x27;;for(let i=0;i&lt;110;i++){const a=i/110*6.283;o+=`&lt;line x1=&quot;${(100+Math.cos(a)*31).toFixed(1)}&quot; y1=&quot;${(100+Math.sin(a)*31).toFixed(1)}&quot; x2=&quot;${(100+Math.cos(a)*42).toFixed(1)}&quot; y2=&quot;${(100+Math.sin(a)*42).toFixed(1)}&quot; stroke=&quot;#86622C&quot; stroke-width=&quot;1.1&quot;/&gt;`;}
+    o+=&#x27;&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;30&quot; fill=&quot;#E5D5AA&quot;/&gt;&#x27;;[[-10,-8],[0,-12],[10,-8]].forEach(([dx,dy])=&gt;{o+=`&lt;path d=&quot;M${100+dx} ${100+dy} l${dx/3} -6 M${100+dx} ${100+dy+14} l${dx/3} 6&quot; stroke=&quot;#6B5324&quot; stroke-width=&quot;1.4&quot; stroke-linecap=&quot;round&quot;/&gt;`;});
+    return frame(&#x27;#EDE6D3&#x27;,debris(51,&#x27;#9A8A62&#x27;)+o,&#x27;Drawing: taeniid egg with striated shell&#x27;);},
+  tcan:()=&gt;{const r=R(61);let o=&#x27;&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;46&quot; fill=&quot;#8E5E30&quot;/&gt;&#x27;;for(let i=0;i&lt;70;i++){const a=r()*6.283,d=36+r()*8;o+=`&lt;circle cx=&quot;${(100+Math.cos(a)*d).toFixed(1)}&quot; cy=&quot;${(100+Math.sin(a)*d).toFixed(1)}&quot; r=&quot;2.6&quot; fill=&quot;#6B431E&quot;/&gt;`;}
+    return frame(&#x27;#EDE6D3&#x27;,debris(62,&#x27;#9A8A62&#x27;)+o+&#x27;&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;32&quot; fill=&quot;#583414&quot;/&gt;&#x27;,&#x27;Drawing: Toxocara egg with thick pitted shell&#x27;);},
+  thel:()=&gt;frame(&#x27;#F1ECE3&#x27;,`&lt;path d=&quot;M34 150 C70 108 118 156 166 52&quot; fill=&quot;none&quot; stroke=&quot;#D9CBA6&quot; stroke-width=&quot;20&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M34 150 C70 108 118 156 166 52&quot; fill=&quot;none&quot; stroke=&quot;#EDE3C9&quot; stroke-width=&quot;16&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M34 150 C70 108 118 156 166 52&quot; fill=&quot;none&quot; stroke=&quot;#B9A57A&quot; stroke-width=&quot;16&quot; stroke-dasharray=&quot;1.2 3.4&quot;/&gt;`,&#x27;Drawing: adult eyeworm with ridged cuticle&#x27;),
+  aph:()=&gt;frame(&#x27;#F6E4E8&#x27;,blood(71,far(100,100,38))+neut(100,100,30)+morula(114,116,72),&#x27;Drawing: morula inside a neutrophil&#x27;),
+  ecan:()=&gt;frame(&#x27;#F6E4E8&#x27;,blood(81,far(100,100,40))+`&lt;circle cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;32&quot; fill=&quot;#DCE3EF&quot; stroke=&quot;#AEB9D2&quot; stroke-width=&quot;1.5&quot;/&gt;&lt;path d=&quot;M76 92 q10 -20 30 -8 q-8 8 4 18 q-20 12 -34 -10z&quot; fill=&quot;#5E6FA8&quot;/&gt;`+morula(116,114,82),&#x27;Drawing: morula inside a monocyte&#x27;),
+  avas:()=&gt;frame(&#x27;#E7ECF1&#x27;,debris(91,&#x27;#8C97A6&#x27;)+`&lt;path d=&quot;M28 146 C58 58 120 156 158 80&quot; fill=&quot;none&quot; stroke=&quot;#B7976A&quot; stroke-width=&quot;8&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;path d=&quot;M158 80 l9 -10 l-5 -2 l8 -11&quot; fill=&quot;none&quot; stroke=&quot;#B7976A&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;path d=&quot;M165 70 l6 5&quot; stroke=&quot;#8D6F42&quot; stroke-width=&quot;1.6&quot; stroke-linecap=&quot;round&quot;/&gt;`,&#x27;Drawing: first-stage larva with a kinked tail&#x27;)
+};
+const MICROCAP={dimm:&#x27;Blood smear: microfilaria&#x27;,drep:&quot;Knott&#x27;s test: microfilaria&quot;,linf:&#x27;Macrophage full of amastigotes&#x27;,bcan:&#x27;Paired pear shapes in red cells&#x27;,hcan:&#x27;Gamont inside a neutrophil&#x27;,egra:&#x27;Taeniid egg, striated shell&#x27;,tcan:&#x27;Egg with a thick, pitted shell&#x27;,thel:&#x27;Adult worm, ridged cuticle&#x27;,aph:&#x27;Morula inside a neutrophil&#x27;,ecan:&#x27;Morula inside a monocyte&#x27;,avas:&#x27;Larva with a kinked tail&#x27;};
+
+const TRAINER=&#x27;trainer.html&#x27;;
+const Q=[
+ {img:&#x27;linf&#x27;,q:&#x27;Inside this dog macrophage: small oval parasites, each with a nucleus and a rod-shaped kinetoplast. Which stage are you looking at?&#x27;,opts:[&#x27;&lt;i&gt;Leishmania&lt;/i&gt; amastigotes&#x27;,&#x27;&lt;i&gt;Leishmania&lt;/i&gt; promastigotes&#x27;,&#x27;&lt;i&gt;Trypanosoma&lt;/i&gt; trypomastigotes&#x27;,&#x27;&lt;i&gt;Toxoplasma&lt;/i&gt; tachyzoites&#x27;],a:0,fact:&#x27;Amastigotes live in the vertebrate host. Promastigotes, with a flagellum, live in the sand fly gut.&#x27;},
+ {q:&#x27;Which sand fly genus transmits &lt;i&gt;Leishmania infantum&lt;/i&gt; in Europe?&#x27;,opts:[&#x27;&lt;i&gt;Phlebotomus&lt;/i&gt;&#x27;,&#x27;&lt;i&gt;Lutzomyia&lt;/i&gt;&#x27;,&#x27;&lt;i&gt;Culicoides&lt;/i&gt;&#x27;,&#x27;&lt;i&gt;Simulium&lt;/i&gt;&#x27;],a:0,fact:&#x27;&lt;i&gt;Lutzomyia&lt;/i&gt; is the vector in the Americas. &lt;i&gt;Culicoides&lt;/i&gt; are biting midges, &lt;i&gt;Simulium&lt;/i&gt; are black flies.&#x27;},
+ {img:&#x27;drep&#x27;,q:&quot;Knott&#x27;s test shows microfilariae, but the heartworm antigen test is negative. Why does that not rule out filariae?&quot;,opts:[&#x27;The test detects antigen from adult female &lt;i&gt;D. immitis&lt;/i&gt; only&#x27;,&#x27;The test detects only microfilariae&#x27;,&#x27;The test only works in cats&#x27;,&#x27;The test reacts with every filarial species&#x27;],a:0,fact:&#x27;&lt;i&gt;D. repens&lt;/i&gt; and &lt;i&gt;Acanthocheilonema&lt;/i&gt; are not detected, and low worm burdens or male-only infections can be missed too.&#x27;},
+ {q:&#x27;Before killing adult heartworms, dogs are often given doxycycline. What is it aimed at?&#x27;,opts:[&#x27;&lt;i&gt;Wolbachia&lt;/i&gt;, bacteria living inside the worms&#x27;,&#x27;&lt;i&gt;Anaplasma&lt;/i&gt;, picked up from the same mosquito&#x27;,&#x27;The microfilariae directly, as the main killer&#x27;,&#x27;Secondary lung infections only&#x27;],a:0,fact:&#x27;Removing &lt;i&gt;Wolbachia&lt;/i&gt; weakens the worms and reduces the inflammation when they die.&#x27;},
+ {img:&#x27;bcan&#x27;,q:&#x27;Large, paired piroplasms in a dog in eastern Austria in spring. Which tick is the main vector?&#x27;,opts:[&#x27;&lt;i&gt;Dermacentor reticulatus&lt;/i&gt;&#x27;,&#x27;&lt;i&gt;Ixodes ricinus&lt;/i&gt;&#x27;,&#x27;&lt;i&gt;Rhipicephalus sanguineus&lt;/i&gt;&#x27;,&#x27;&lt;i&gt;Haemaphysalis concinna&lt;/i&gt;&#x27;],a:0,fact:&#x27;The ornate dog tick is active in spring and autumn, often at lower temperatures than &lt;i&gt;Ixodes&lt;/i&gt;.&#x27;},
+ {q:&#x27;Which statement about &lt;i&gt;Hepatozoon canis&lt;/i&gt; is true?&#x27;,opts:[&#x27;Dogs are infected by eating an infected &lt;i&gt;Rhipicephalus&lt;/i&gt; tick&#x27;,&#x27;It is transmitted by the bite of &lt;i&gt;Dermacentor&lt;/i&gt;&#x27;,&#x27;Its gamonts are found in red blood cells&#x27;,&#x27;It is a common cause of disease in humans&#x27;],a:0,fact:&#x27;The gamonts sit in neutrophils. Puppies can also be infected before birth.&#x27;},
+ {img:&#x27;egra&#x27;,q:&#x27;You find this taeniid egg in fox faeces in Austria. Can the microscope tell you whether it is &lt;i&gt;Echinococcus multilocularis&lt;/i&gt;?&#x27;,opts:[&#x27;No: taeniid eggs look alike, you need PCR&#x27;,&#x27;Yes: only &lt;i&gt;Echinococcus&lt;/i&gt; eggs have a striated shell&#x27;,&#x27;Yes: &lt;i&gt;E. multilocularis&lt;/i&gt; eggs are twice as large&#x27;,&#x27;No: &lt;i&gt;E. multilocularis&lt;/i&gt; does not produce eggs&#x27;],a:0,fact:&#x27;&lt;i&gt;Taenia&lt;/i&gt; and &lt;i&gt;Echinococcus&lt;/i&gt; eggs are indistinguishable by light microscopy. Copro-PCR identifies the species.&#x27;}
+];
+const shuffle=a=&gt;{a=a.slice();for(let i=a.length-1;i&gt;0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+let st;
+function start(){st={i:0,res:[],order:Q.map(q=&gt;shuffle(q.opts.map((o,n)=&gt;n))),picked:null};document.getElementById(&#x27;confetti&#x27;).innerHTML=&#x27;&#x27;;render();}
+function dots(){document.getElementById(&#x27;dots&#x27;).innerHTML=Q.map((_,n)=&gt;`&lt;span class=&quot;${st.res[n]===true?&#x27;r&#x27;:st.res[n]===false?&#x27;w&#x27;:n===st.i?&#x27;c&#x27;:&#x27;&#x27;}&quot;&gt;&lt;/span&gt;`).join(&#x27;&#x27;);}
+function render(){
+  dots();const app=document.getElementById(&#x27;app&#x27;);
+  if(st.i&gt;=Q.length){return end(app);}
+  const q=Q[st.i],ord=st.order[st.i],ans=st.picked!==null;
+  app.innerHTML=`&lt;div class=&quot;q&quot;&gt;&lt;span class=&quot;num&quot;&gt;Question ${st.i+1} of ${Q.length}&lt;/span&gt;&lt;h2&gt;${q.q}&lt;/h2&gt;
+  ${q.img?`&lt;figure&gt;${MICRO[q.img]()}&lt;figcaption&gt;${MICROCAP[q.img]} (drawing)&lt;/figcaption&gt;&lt;/figure&gt;`:&#x27;&#x27;}
+  ${ord.map((n,k)=&gt;{let c=&#x27;&#x27;;if(ans){if(n===q.a)c=&#x27;right&#x27;;else if(n===st.picked)c=&#x27;wrong&#x27;;}return `&lt;button class=&quot;opt ${c}&quot; data-n=&quot;${n}&quot; ${ans?&#x27;disabled&#x27;:&#x27;&#x27;}&gt;&lt;span class=&quot;k&quot;&gt;${&#x27;ABCD&#x27;[k]}&lt;/span&gt;&lt;span&gt;${q.opts[n]}&lt;/span&gt;&lt;/button&gt;`;}).join(&#x27;&#x27;)}
+  ${ans?`&lt;p class=&quot;fb&quot;&gt;${st.picked===q.a?&#x27;&lt;b class=&quot;r&quot;&gt;Correct!&lt;/b&gt;&#x27;:&#x27;&lt;b class=&quot;w&quot;&gt;Not quite.&lt;/b&gt;&#x27;} ${q.fact}&lt;/p&gt;&lt;button class=&quot;btn&quot; id=&quot;next&quot;&gt;${st.i===Q.length-1?&#x27;See my result&#x27;:&#x27;Next question&#x27;}&lt;/button&gt;`:&#x27;&#x27;}&lt;/div&gt;`;
+  app.querySelectorAll(&#x27;.opt&#x27;).forEach(b=&gt;b.onclick=()=&gt;{if(st.picked!==null)return;st.picked=+b.dataset.n;st.res[st.i]=st.picked===q.a;render();});
+  const nx=document.getElementById(&#x27;next&#x27;);if(nx){nx.onclick=()=&gt;{st.i++;st.picked=null;render();parent.postMessage({top:1},&#x27;*&#x27;);};nx.focus();}
+}
+function end(app){
+  const s=st.res.filter(Boolean).length;let e,m,t;
+  if(s===7){e=&#x27;🎉🔬🦠&#x27;;m=&#x27;Parasite pro! Even the sand flies are impressed.&#x27;;t=&#x27;Go and teach the others.&#x27;;}
+  else if(s&gt;=5){e=&#x27;🥲🦟&#x27;;m=&#x27;So close! The parasites are getting nervous.&#x27;;t=&#x27;Flip through the cards once more and you will get 7 out of 7.&#x27;;}
+  else if(s&gt;=3){e=&#x27;😅🪱&#x27;;m=&#x27;The worms are winning, but only just.&#x27;;t=&#x27;The flashcards are waiting for you. Then come back for revenge.&#x27;;}
+  else{e=&#x27;😭🦠🎈&#x27;;m=&#x27;The parasites threw a party in your honour.&#x27;;t=&#x27;Time for the flashcards. They are friendlier than the parasites.&#x27;;}
+  app.innerHTML=`&lt;div class=&quot;q end&quot;&gt;&lt;p class=&quot;big ${s&lt;7?&#x27;wob&#x27;:&#x27;&#x27;}&quot;&gt;${e}&lt;/p&gt;&lt;p class=&quot;score&quot;&gt;${s} / 7&lt;/p&gt;&lt;p class=&quot;msg&quot;&gt;${m}&lt;/p&gt;&lt;p class=&quot;tip&quot;&gt;${t}&lt;/p&gt;
+  &lt;button class=&quot;btn&quot; id=&quot;tocards&quot;&gt;Learn with the cards&lt;/button&gt;&lt;button class=&quot;btn alt&quot; id=&quot;again&quot;&gt;Try again&lt;/button&gt;&lt;/div&gt;`;
+  document.getElementById(&#x27;again&#x27;).onclick=start;
+  document.getElementById(&#x27;tocards&#x27;).onclick=()=&gt;parent.postMessage({go:&#x27;cards&#x27;},&#x27;*&#x27;);
+  if(s===7) party();
+}
+function party(){const c=document.getElementById(&#x27;confetti&#x27;),em=[&#x27;🎉&#x27;,&#x27;🦠&#x27;,&#x27;🔬&#x27;,&#x27;🦟&#x27;,&#x27;🐕&#x27;,&#x27;🪱&#x27;,&#x27;✨&#x27;];let h=&#x27;&#x27;;for(let i=0;i&lt;40;i++){h+=`&lt;span style=&quot;left:${Math.random()*100}vw;animation-duration:${2.5+Math.random()*2.5}s;animation-delay:${Math.random()*1.5}s&quot;&gt;${em[i%em.length]}&lt;/span&gt;`;}c.innerHTML=h;}
+start();
+function sz(){parent.postMessage({h:document.documentElement.scrollHeight},&#x27;*&#x27;);}
+new ResizeObserver(sz).observe(document.body);sz();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe></section>
+  <section id="cards" hidden></section>
+  <section id="pairs" hidden></section>
+  <section id="quiz" hidden></section>
+  <div class="burst" id="burst" aria-hidden="true"></div>
+  <p class="note">Facts are a teaching summary. Check them against your own references before using them in class. Lab lines come from my lab protocols. Microscope pictures are drawings, not real micrographs.</p>
+</div>
+<script>
+/* Microscopy-style drawings (illustrations, not real micrographs) */
+let MID=0;
+function R(s){let x=s%2147483647||1;return()=>(x=x*16807%2147483647)/2147483647;}
+function rbc(x,y,r){return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#E7A3AF" stroke="#C98492" stroke-width="1"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r*.42).toFixed(1)}" fill="#F2C6CE"/>`;}
+function spots(seed,n,minR,maxR,skip){const r=R(seed),pts=[];for(let i=0;i<n*8&&pts.length<n;i++){const x=r()*200,y=r()*200,rad=minR+r()*(maxR-minR);if(skip&&skip(x,y))continue;if(pts.some(p=>Math.hypot(p[0]-x,p[1]-y)<(rad+p[2])*1.05))continue;pts.push([x,y,rad]);}return pts;}
+function blood(seed,skip){return spots(seed,30,10,13,skip).map(p=>rbc(...p)).join('');}
+function debris(seed,col){return spots(seed,26,1,3).map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${p[2].toFixed(1)}" fill="${col}" opacity=".45"/>`).join('');}
+const far=(cx,cy,d)=>(x,y)=>Math.hypot(x-cx,y-cy)<d;
+function frame(bg,inner,label){const id='m'+(++MID);return `<svg viewBox="0 0 200 200" role="img" aria-label="${label}" class="micro"><defs><clipPath id="${id}"><circle cx="100" cy="100" r="94"/></clipPath><radialGradient id="${id}v" cx="50%" cy="50%" r="50%"><stop offset="72%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".32"/></radialGradient></defs><circle cx="100" cy="100" r="99" fill="#1E2422"/><g clip-path="url(#${id})"><rect width="200" height="200" fill="${bg}"/>${inner}<rect width="200" height="200" fill="url(#${id}v)"/></g></svg>`;}
+function morula(x,y,seed){const r=R(seed);let o='';for(let i=0;i<8;i++)o+=`<circle cx="${(x+(r()-.5)*9).toFixed(1)}" cy="${(y+(r()-.5)*9).toFixed(1)}" r="2.3" fill="#4A2A7E"/>`;return o;}
+function neut(x,y,s){return `<circle cx="${x}" cy="${y}" r="${s}" fill="#E6DDEE" stroke="#BBAACD" stroke-width="1.5"/><circle cx="${x-s*.35}" cy="${y-s*.2}" r="${s*.28}" fill="#6A4C9C"/><circle cx="${x+s*.05}" cy="${y-s*.42}" r="${s*.26}" fill="#6A4C9C"/><circle cx="${x+s*.4}" cy="${y-s*.05}" r="${s*.28}" fill="#6A4C9C"/>`;}
+const MICRO={
+  dimm:()=>frame('#F6E4E8',blood(11)+`<path d="M18 132 C50 70 85 160 118 104 S168 80 184 94" fill="none" stroke="#6E4FA3" stroke-width="6" stroke-linecap="round"/><path d="M184 94 q7 5 9 12" fill="none" stroke="#6E4FA3" stroke-width="2.6" stroke-linecap="round"/><path d="M24 124 C52 72 86 158 118 104 S166 82 180 93" fill="none" stroke="#3E2670" stroke-width="2.6" stroke-dasharray="1.6 2.4"/>`,'Drawing: microfilaria in a blood smear'),
+  drep:()=>frame('#E7ECF1',debris(12,'#8C97A6')+`<path d="M22 60 C70 40 90 120 130 110 S170 150 160 170" fill="none" stroke="#6E4FA3" stroke-width="6.5" stroke-linecap="round"/><path d="M160 170 q-2 10 -12 10" fill="none" stroke="#6E4FA3" stroke-width="2.6" stroke-linecap="round"/><path d="M28 58 C72 42 92 118 130 108 S166 146 159 164" fill="none" stroke="#3E2670" stroke-width="2.6" stroke-dasharray="1.6 2.4"/>`,"Drawing: microfilaria in a Knott's test"),
+  linf:()=>{const r=R(21);let a='';const pts=[];for(let i=0;i<200&&pts.length<16;i++){const ang=r()*6.283,d=Math.sqrt(r())*46,x=100+Math.cos(ang)*d,y=104+Math.sin(ang)*d;if(Math.hypot((x-112)/24,(y-80)/18)<1)continue;if(pts.some(p=>Math.hypot(p[0]-x,p[1]-y)<12))continue;pts.push([x,y]);const rot=(r()*180).toFixed(0);a+=`<g transform="rotate(${rot} ${x.toFixed(1)} ${y.toFixed(1)})"><ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="6" ry="4" fill="#B9A9DA" stroke="#7A62B5" stroke-width="1"/><circle cx="${(x-1.5).toFixed(1)}" cy="${y.toFixed(1)}" r="1.9" fill="#4A2D84"/><rect x="${(x+2).toFixed(1)}" y="${(y-.6).toFixed(1)}" width="2.4" height="1.2" fill="#24124D"/></g>`;}
+    return frame('#F4E8EC',blood(23,far(100,104,64))+`<circle cx="100" cy="104" r="58" fill="#D4DCEF" stroke="#A7B3D4" stroke-width="2"/><ellipse cx="112" cy="80" rx="20" ry="14" fill="#5E4C9E"/>`+a,'Drawing: macrophage full of Leishmania amastigotes');},
+  bcan:()=>{let o='';[[62,70],[132,64],[96,128],[150,138]].forEach(([x,y])=>{o+=rbc(x,y,18)+`<ellipse cx="${x-5}" cy="${y+1}" rx="8" ry="3.6" transform="rotate(-35 ${x-5} ${y+1})" fill="#7A5DB0"/><ellipse cx="${x+5}" cy="${y+1}" rx="8" ry="3.6" transform="rotate(35 ${x+5} ${y+1})" fill="#7A5DB0"/><circle cx="${x-9}" cy="${y+5}" r="2" fill="#3E2670"/><circle cx="${x+9}" cy="${y+5}" r="2" fill="#3E2670"/>`;});
+    return frame('#F6E4E8',blood(31,(x,y)=>[[62,70],[132,64],[96,128],[150,138]].some(([a,b])=>Math.hypot(x-a,y-b)<30))+o,'Drawing: paired pear-shaped Babesia in red blood cells');},
+  hcan:()=>frame('#F6E4E8',blood(41,far(100,100,40))+neut(100,100,30)+`<rect x="82" y="104" width="38" height="14" rx="7" fill="#C6D3EA" stroke="#8C9FC6" stroke-width="1.2"/><ellipse cx="101" cy="111" rx="7" ry="4" fill="#7C8FBF"/>`,'Drawing: Hepatozoon gamont inside a neutrophil'),
+  egra:()=>{let o='<circle cx="100" cy="100" r="42" fill="#C8A263"/>';for(let i=0;i<110;i++){const a=i/110*6.283;o+=`<line x1="${(100+Math.cos(a)*31).toFixed(1)}" y1="${(100+Math.sin(a)*31).toFixed(1)}" x2="${(100+Math.cos(a)*42).toFixed(1)}" y2="${(100+Math.sin(a)*42).toFixed(1)}" stroke="#86622C" stroke-width="1.1"/>`;}
+    o+='<circle cx="100" cy="100" r="30" fill="#E5D5AA"/>';[[-10,-8],[0,-12],[10,-8]].forEach(([dx,dy])=>{o+=`<path d="M${100+dx} ${100+dy} l${dx/3} -6 M${100+dx} ${100+dy+14} l${dx/3} 6" stroke="#6B5324" stroke-width="1.4" stroke-linecap="round"/>`;});
+    return frame('#EDE6D3',debris(51,'#9A8A62')+o,'Drawing: taeniid egg with striated shell');},
+  tcan:()=>{const r=R(61);let o='<circle cx="100" cy="100" r="46" fill="#8E5E30"/>';for(let i=0;i<70;i++){const a=r()*6.283,d=36+r()*8;o+=`<circle cx="${(100+Math.cos(a)*d).toFixed(1)}" cy="${(100+Math.sin(a)*d).toFixed(1)}" r="2.6" fill="#6B431E"/>`;}
+    return frame('#EDE6D3',debris(62,'#9A8A62')+o+'<circle cx="100" cy="100" r="32" fill="#583414"/>','Drawing: Toxocara egg with thick pitted shell');},
+  thel:()=>frame('#F1ECE3',`<path d="M34 150 C70 108 118 156 166 52" fill="none" stroke="#D9CBA6" stroke-width="20" stroke-linecap="round"/><path d="M34 150 C70 108 118 156 166 52" fill="none" stroke="#EDE3C9" stroke-width="16" stroke-linecap="round"/><path d="M34 150 C70 108 118 156 166 52" fill="none" stroke="#B9A57A" stroke-width="16" stroke-dasharray="1.2 3.4"/>`,'Drawing: adult eyeworm with ridged cuticle'),
+  aph:()=>frame('#F6E4E8',blood(71,far(100,100,38))+neut(100,100,30)+morula(114,116,72),'Drawing: morula inside a neutrophil'),
+  ecan:()=>frame('#F6E4E8',blood(81,far(100,100,40))+`<circle cx="100" cy="100" r="32" fill="#DCE3EF" stroke="#AEB9D2" stroke-width="1.5"/><path d="M76 92 q10 -20 30 -8 q-8 8 4 18 q-20 12 -34 -10z" fill="#5E6FA8"/>`+morula(116,114,82),'Drawing: morula inside a monocyte'),
+  avas:()=>frame('#E7ECF1',debris(91,'#8C97A6')+`<path d="M28 146 C58 58 120 156 158 80" fill="none" stroke="#B7976A" stroke-width="8" stroke-linecap="round"/><path d="M158 80 l9 -10 l-5 -2 l8 -11" fill="none" stroke="#B7976A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M165 70 l6 5" stroke="#8D6F42" stroke-width="1.6" stroke-linecap="round"/>`,'Drawing: first-stage larva with a kinked tail')
+};
+const MICROCAP={dimm:'Blood smear: microfilaria',drep:"Knott's test: microfilaria",linf:'Macrophage full of amastigotes',bcan:'Paired pear shapes in red cells',hcan:'Gamont inside a neutrophil',egra:'Taeniid egg, striated shell',tcan:'Egg with a thick, pitted shell',thel:'Adult worm, ridged cuticle',aph:'Morula inside a neutrophil',ecan:'Morula inside a monocyte',avas:'Larva with a kinked tail'};
+
+const P=[
+{id:'dimm',name:'Dirofilaria immitis',common:'Canine heartworm',g:'nem',hosts:'Dogs, golden jackals, foxes, wolves; cats less often',tr:'Mosquito bite',trK:'mosq',site:'Pulmonary arteries and right heart',siteK:'heart',dis:'Cardiopulmonary dirofilariosis',hum:'Accidental host; can cause lung nodules',dx:'Antigen test, Knott\'s test, PCR',lab:'ITS1 PCR, primers FilF / FilR (Koehsler et al. 2007, Emerg Infect Dis), about 300–320 bp',tip:"Look-alike: <i>D. repens</i>. Only <i>D. immitis</i> turns the antigen test positive; its microfilariae have a tapered head and a straight tail."},
+{id:'drep',name:'Dirofilaria repens',common:'Subcutaneous filaria',g:'nem',hosts:'Dogs, wild canids, cats',tr:'Mosquito bite',trK:'mosq',site:'Under the skin (subcutaneous tissue)',siteK:'skin',dis:'Subcutaneous dirofilariosis',hum:'Main cause of human dirofilariosis in Europe; nodules under the skin or in the eye',dx:'Knott\'s test, PCR; no routine antigen test',lab:'ITS1 PCR, primers FilF / FilR (Koehsler et al. 2007, Emerg Infect Dis), 274 bp',tip:"Look-alike: <i>D. immitis</i>. Blunt head, tail curved like an umbrella handle, and a negative antigen test."},
+{id:'linf',name:'Leishmania infantum',common:'Agent of canine leishmaniosis',g:'pro',hosts:'Dogs as main reservoir; also jackals and foxes',tr:'Sand fly bite (Phlebotomus)',trK:'sand',site:'Macrophages in skin, spleen, liver and bone marrow',siteK:'mac',dis:'Canine leishmaniosis',hum:'Visceral leishmaniasis, also skin lesions',dx:'Serology (IFAT, ELISA), PCR, cytology',lab:'ITS1 PCR, primers LITSR / 5.8S (El Tai et al. 2000), 300–350 bp',tip:"Amastigotes (nucleus plus kinetoplast) in the dog; flagellated promastigotes in the sand fly."},
+{id:'bcan',name:'Babesia canis',common:'Large canine piroplasm',g:'pro',hosts:'Dogs',tr:'Tick bite (Dermacentor reticulatus)',trK:'derm',site:'Red blood cells',siteK:'rbc',dis:'Canine babesiosis with haemolytic anaemia',hum:'Not considered zoonotic',dx:'Blood smear, PCR',tip:"Large piroplasm, often in pairs. Small babesias such as <i>B. vulpes</i> appear as single small rings."},
+{id:'hcan',name:'Hepatozoon canis',common:'Canine hepatozoon',g:'pro',hosts:'Dogs, foxes, golden jackals',tr:'Swallowing an infected tick (Rhipicephalus)',trK:'swtick',site:'White blood cells; tissue stages in spleen and bone marrow',siteK:'wbc',dis:'Canine hepatozoonosis',hum:'Not considered zoonotic',dx:'Blood smear (gamonts in neutrophils), PCR',tip:"Gamonts sit in neutrophils, not in red cells. The tick bite does nothing: the dog has to eat the tick."},
+{id:'egra',name:'Echinococcus granulosus',common:'Dog tapeworm, hydatid cyst',g:'ces',hosts:'Dogs and wild canids (adult worm); sheep, cattle and humans (cysts)',tr:'Dogs eat offal with cysts; sheep and humans swallow eggs',trK:'offal',site:'Small intestine of the dog',siteK:'gut',dis:'Cystic echinococcosis (hydatid cysts) in intermediate hosts',hum:'Cysts in liver and lungs',dx:'Dogs: coproantigen, copro-PCR. Humans: imaging, serology',tip:"Taeniid eggs all look the same. Species needs copro-PCR."},
+{id:'tcan',name:'Toxocara canis',common:'Dog roundworm',g:'nem',hosts:'Dogs, foxes',tr:'Swallowing eggs; puppies infected before birth or via milk',trK:'eggs',site:'Small intestine (adult worms)',siteK:'gut',dis:'Intestinal toxocarosis, heavy in puppies',hum:'Visceral and ocular larva migrans',dx:'Dogs: faecal flotation. Humans: serology',tip:"Thick, brown, pitted shell. Fresh eggs are not infective; they need some weeks outside."},
+{id:'thel',name:'Thelazia callipaeda',common:'Oriental eyeworm',g:'nem',hosts:'Dogs, cats, foxes, wolves, humans',tr:'Fruit flies feeding on eye secretions (Phortica)',trK:'fly',site:'Conjunctival sac of the eye',siteK:'eye',dis:'Ocular thelaziosis',hum:'Eye infection, zoonotic',dx:'Worms seen in the eye, morphology, PCR',tip:"Lives on the eye surface. Male <i>Phortica variegata</i> flies feed on tears and pass on the larvae."},
+{id:'aph',name:'Anaplasma phagocytophilum',common:'Granulocytic anaplasmosis',g:'bac',hosts:'Dogs, horses, ruminants, humans; rodents and deer as reservoirs',tr:'Tick bite (Ixodes)',trK:'ixo',site:'Neutrophils',siteK:'wbc',dis:'Granulocytic anaplasmosis',hum:'Human granulocytic anaplasmosis',dx:'Blood smear (morulae), PCR, serology',tip:"Look-alike: <i>Ehrlichia canis</i>. Here the morulae are in neutrophils."},
+{id:'ecan',name:'Ehrlichia canis',common:'Canine monocytic ehrlichiosis',g:'bac',hosts:'Dogs, wild canids',tr:'Tick bite (Rhipicephalus)',trK:'rhip',site:'Monocytes',siteK:'mono',dis:'Canine monocytic ehrlichiosis',hum:'Rarely reported in humans',dx:'Serology, PCR, blood smear (morulae)',tip:"Look-alike: <i>Anaplasma phagocytophilum</i>. Here the morulae are in monocytes."},
+{id:'avas',name:'Angiostrongylus vasorum',common:'French heartworm',g:'nem',hosts:'Dogs, foxes; snails and slugs as intermediate hosts',tr:'Eating infected snails or slugs',trK:'snail',site:'Pulmonary arteries and right heart',siteK:'heart',dis:'Canine angiostrongylosis, bleeding disorders',hum:'Not zoonotic',dx:'Baermann test (larvae in faeces), antigen test',tip:"First-stage larva with a kinked, notched tail. Use the Baermann test, not flotation."}
+];
+const G={nem:'Nematodes',pro:'Protozoa',ces:'Cestodes',bac:'Bacteria'};
+const TYPES={t:'Transmission',s:'Site in host',d:'Diagnosis',i:'Identify'};
+const LEVELS=[[0,'🔬','Smear reader'],[10,'🦟','Vector hunter'],[25,'🧬','PCR wizard'],[50,'🏆','Parasite pro']];
+const PAIRS=[['dimm','drep'],['aph','ecan'],['bcan','hcan'],['dimm','avas'],['egra','tcan']];
+const KEY='parasite-trainer-v1';
+let S={learned:{},stats:{},xp:0};
+try{const r=localStorage.getItem(KEY); if(r) S=Object.assign(S,JSON.parse(r));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const fig=p=>`<figure class="fig">${MICRO[p.id]()}<figcaption>${MICROCAP[p.id]} (drawing)</figcaption></figure>`;
+const nm=p=>`<i>${esc(p.name)}</i>`;
+
+/* ---------- Cards ---------- */
+let cf={group:'all',dir:'name',order:P.map(p=>p.id),i:0,flipped:false};
+const cardsEl=document.getElementById('cards');
+function cardList(){return cf.order.map(id=>P.find(p=>p.id===id)).filter(p=>cf.group==='all'||p.g===cf.group);}
+function facts(p){
+  return `<dl>
+  <dt>Hosts</dt><dd>${esc(p.hosts)}</dd>
+  <dt>Transmission</dt><dd>${esc(p.tr)}</dd>
+  <dt>Site in host</dt><dd>${esc(p.site)}</dd>
+  <dt>Disease</dt><dd>${esc(p.dis)}</dd>
+  <dt>In humans</dt><dd>${esc(p.hum)}</dd>
+  <dt>Diagnosis</dt><dd>${esc(p.dx)}</dd></dl>${p.tip?`<div class="tipbox"><b>Exam tip:</b> ${p.tip}</div>`:''}${p.lab?`<div class="lab"><b>From my lab book:</b> ${esc(p.lab)}</div>`:''}`;
+}
+function renderCards(){
+  const list=cardList(); if(cf.i>=list.length) cf.i=0;
+  const inGroup=P.filter(p=>cf.group==='all'||p.g===cf.group);
+  const learned=inGroup.filter(p=>S.learned[p.id]).length;
+  const chips=['all',...Object.keys(G)].map(k=>`<button class="chip" data-g="${k}" aria-pressed="${cf.group===k}">${k==='all'?'All':G[k]}</button>`).join('');
+  const p=list[cf.i];
+  let body='';
+  if(!p){body=`<div class="face done">No cards here.</div>`;}
+  else{
+    const front = cf.dir==='name'
+      ? `<div class="namefig">${MICRO[p.id]()}</div><span class="tag g-${p.g}">${G[p.g]}</span><p class="sp">${nm(p)}</p><p class="common">${esc(p.common)}</p><p class="hint">Recall hosts, vector, site and the test you would use, then tap</p>`
+      : `<div class="clues"><figure class="fig bigfig">${MICRO[p.id]()}<figcaption>${MICROCAP[p.id]} (drawing)</figcaption></figure><p><b>Transmission</b>${esc(p.tr)}</p><p><b>Site in host</b>${esc(p.site)}</p><p><b>Diagnosis</b>${esc(p.dx)}</p></div><p class="hint">Which pathogen is this? Tap to check</p>`;
+    const back=`<div class="top"><div><span class="tag g-${p.g}">${G[p.g]}</span><p class="sp">${nm(p)}</p><p class="common">${esc(p.common)}</p></div>${fig(p)}</div>${facts(p)}`;
+    body=`<div class="scene"><div class="flipper ${cf.flipped?'on sb':''}" id="flip" tabindex="0" role="button" aria-label="Flip card"><div class="face front gc-${p.g}">${front}</div><div class="face back gc-${p.g}">${back}</div></div></div>
+    <div class="actions" id="acts" ${cf.flipped?'':'hidden'}><button class="again" id="again">Again</button><button class="know" id="know">I know it</button></div>`;
+  }
+  const pct=Math.round(100*learned/Math.max(inGroup.length,1));
+  cardsEl.innerHTML=`<div class="chips">${chips}</div>
+  <div class="bar"><span class="prog"><span class="ring" style="--p:${pct}"><span>${pct}%</span></span>${learned} / ${inGroup.length} learned</span>
+  <span style="display:flex;gap:8px;align-items:center"><span class="seg"><button data-d="name" aria-pressed="${cf.dir==='name'}">Name first</button><button data-d="clue" aria-pressed="${cf.dir==='clue'}">Clues first</button></span><button class="plain" id="mix">Shuffle</button></span></div>${body}
+  <div class="foot"><span>Space to flip. 1 = again, 2 = I know it.</span><button class="plain" id="resetc">Reset learned cards</button></div>`;
+  cardsEl.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cf.group=b.dataset.g;cf.i=0;cf.flipped=false;renderCards();});
+  cardsEl.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{cf.dir=b.dataset.d;cf.flipped=false;renderCards();});
+  document.getElementById('mix').onclick=()=>{cf.order=shuffle(cf.order);cf.i=0;cf.flipped=false;renderCards();};
+  document.getElementById('resetc').onclick=()=>{S.learned={};save();renderCards();};
+  const f=document.getElementById('flip'); if(f) f.onclick=flipCard;
+  const a=document.getElementById('again'); if(a) a.onclick=()=>answerCard(false);
+  const k=document.getElementById('know'); if(k) k.onclick=()=>answerCard(true);
+}
+function flipCard(){const f=document.getElementById('flip');if(!f)return;cf.flipped=!cf.flipped;f.classList.toggle('on',cf.flipped);const want=cf.flipped;clearTimeout(window._sb);window._sb=setTimeout(()=>f.classList.toggle('sb',want),280);const a=document.getElementById('acts');if(a)a.hidden=!cf.flipped;}
+function answerCard(ok){
+  const list=cardList(), p=list[cf.i]; if(!p) return;
+  if(ok){S.learned[p.id]=true;} else {delete S.learned[p.id]; cf.order=cf.order.filter(x=>x!==p.id).concat(p.id); cf.i--;}
+  save(); cf.i=(cf.i+1)%Math.max(list.length,1); cf.flipped=false; renderCards();
+}
+
+/* ---------- Quiz ---------- */
+const quizEl=document.getElementById('quiz');
+function mkQ(p,t){
+  const others=P.filter(x=>x.id!==p.id);
+  let prompt,right,pool;
+  if(t==='t'){prompt=`How is ${nm(p)} transmitted?`;right=esc(p.tr);pool=[...new Set(others.filter(x=>x.trK!==p.trK).map(x=>esc(x.tr)))];}
+  else if(t==='s'){prompt=`Where does ${nm(p)} live in its host?`;right=esc(p.site);pool=[...new Set(others.filter(x=>x.siteK!==p.siteK).map(x=>esc(x.site)))];}
+  else if(t==='d'){prompt=`Which tests would you use for ${nm(p)}?`;right=esc(p.dx);pool=[...new Set(others.filter(x=>x.dx!==p.dx).map(x=>esc(x.dx)))];}
+  else {prompt=`Which pathogen is this?<span class="clue">Lives in <mark>${esc(p.site.toLowerCase())}</mark>, spread by <mark>${esc(p.tr.toLowerCase())}</mark></span>`;right=nm(p);pool=others.map(nm);}
+  const opts=shuffle([right,...shuffle(pool).slice(0,3)]);
+  return {id:p.id,t,prompt,opts,right,expl:`${nm(p)}: ${esc(p.dis)}. ${p.tip||''}`};
+}
+let qz=null;
+function newQuiz(){const qs=[];P.forEach(p=>Object.keys(TYPES).forEach(t=>qs.push(mkQ(p,t))));qz={qs:shuffle(qs),i:0,right:0,streak:0,picked:null};}
+function cell(p,t){
+  const s=(S.stats[p.id]||{})[t]; if(!s) return '<td>–</td>';
+  const cls=s[0]>s[1]?'good':'poor'; return `<td class="${cls}">${s[0]} / ${s[0]+s[1]}</td>`;
+}
+function renderQuiz(){
+  if(!qz) newQuiz();
+  const q=qz.qs[qz.i], answered=qz.picked!==null;
+  const pct=qz.i+(answered?1:0)?Math.round(100*qz.right/(qz.i+(answered?1:0))):null;
+  let body;
+  if(!q){body=`<div class="q done"><h2>Done: ${qz.right} of ${qz.qs.length} right.</h2><button class="next" id="again-q">Start a new quiz</button></div>`;}
+  else{
+    const p=P.find(x=>x.id===q.id);
+    body=`<div class="q"><span class="tag g-${p.g}">${TYPES[q.t]}</span><h2>${q.prompt}</h2>
+    ${q.opts.map((o,n)=>{let c='';if(answered){if(o===q.right)c='right';else if(n===qz.picked)c='wrong';}
+      return `<button class="opt ${c}" data-n="${n}" ${answered?'disabled':''}><span class="k">${n+1}</span><span>${o}</span></button>`;}).join('')}
+    ${answered?`<p class="fb">${q.opts[qz.picked]===q.right?'<b class="r">Right.</b>':'<b class="w">Not this one.</b>'} ${q.expl}</p><button class="next" id="nextq">Next question</button>`:''}</div>`;
+  }
+  const lv=LEVELS.filter(l=>S.xp>=l[0]).pop(), nx=LEVELS.find(l=>l[0]>S.xp);
+  quizEl.innerHTML=`<span class="level" id="lvl">${lv[1]} ${lv[2]} · ${S.xp} XP${nx?` · ${nx[0]-S.xp} to ${nx[2]}`:''}</span><div class="stats"><div><strong>${pct===null?'–':pct+'%'}</strong><span>right</span></div><div><strong>${qz.streak}${qz.streak>=3?' 🔥':''}</strong><span>streak</span></div><div><strong>${Math.min(qz.i+1,qz.qs.length)} / ${qz.qs.length}</strong><span>questions</span></div></div>
+  ${body}
+  <h3>Your map</h3><p class="sub">Green means you're getting it, red means not yet, grey means not tried.</p>
+  <div class="gridwrap"><table class="grid"><tr><th>Pathogen</th>${Object.values(TYPES).map(t=>`<th>${t}</th>`).join('')}</tr>
+  ${P.map(p=>`<tr><td class="n">${nm(p)}</td>${Object.keys(TYPES).map(t=>cell(p,t)).join('')}</tr>`).join('')}</table></div>
+  <div class="foot"><span>Keys 1–4 to answer, Space for the next question.</span><button class="plain" id="resetq">Reset statistics</button></div>`;
+  quizEl.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(+b.dataset.n));
+  const n=document.getElementById('nextq'); if(n){n.onclick=nextQ;n.focus();}
+  const ag=document.getElementById('again-q'); if(ag) ag.onclick=()=>{newQuiz();renderQuiz();};
+  document.getElementById('resetq').onclick=()=>{S.stats={};save();newQuiz();renderQuiz();};
+}
+function pick(n){
+  const q=qz.qs[qz.i]; if(!q||qz.picked!==null) return;
+  qz.picked=n; const ok=q.opts[n]===q.right;
+  S.stats[q.id]=S.stats[q.id]||{}; const s=S.stats[q.id][q.t]||[0,0]; s[ok?0:1]++; S.stats[q.id][q.t]=s; save();
+  if(ok){qz.right++;qz.streak++;S.xp=(S.xp||0)+(qz.streak>=3?2:1);save();if(qz.streak%5===0)burst();}else qz.streak=0;
+  renderQuiz();
+}
+function nextQ(){qz.i++;qz.picked=null;renderQuiz();}
+
+
+/* ---------- Look-alikes ---------- */
+const pairsEl=document.getElementById('pairs');
+let pi=0,showDiff=false;
+function renderPairs(){
+  const [a,b]=PAIRS[pi].map(id=>P.find(p=>p.id===id));
+  const rows=[['Site in host','site'],['Transmission','tr'],['Diagnosis','dx'],['In humans','hum']];
+  const mini=p=>`<div class="mini gc-${p.g}">${MICRO[p.id]()}<h4>${nm(p)}</h4><p class="common" style="text-align:center;margin:0 0 8px">${esc(p.common)}</p>${rows.map(([l,k])=>`<div class="row ${showDiff&&a[k]!==b[k]?'diff':''}"><b>${l}</b>${esc(p[k])}</div>`).join('')}<div class="row ${showDiff?'diff':''}"><b>Key difference</b>${p.tip}</div></div>`;
+  pairsEl.innerHTML=`<p class="sub">Pathogens that are easy to confuse. Study the pair, then press the button to highlight what differs.</p>
+  <div class="pairnav"><button class="plain" id="pprev">← Previous</button><span>Pair ${pi+1} of ${PAIRS.length}</span><button class="plain" id="pnext">Next →</button></div>
+  <div class="pair">${mini(a)}${mini(b)}</div>
+  <div class="foot"><button class="next" id="pdiff">${showDiff?'Hide differences':'Spot the differences'}</button><span>Arrow keys: previous / next pair</span></div>`;
+  document.getElementById('pprev').onclick=()=>{pi=(pi-1+PAIRS.length)%PAIRS.length;showDiff=false;renderPairs();};
+  document.getElementById('pnext').onclick=()=>{pi=(pi+1)%PAIRS.length;showDiff=false;renderPairs();};
+  document.getElementById('pdiff').onclick=()=>{showDiff=!showDiff;renderPairs();};
+}
+function burst(){const c=document.getElementById('burst'),em=['🔥','🦠','🔬','🦟','🧬','✨'];let h='';for(let i=0;i<26;i++){h+=`<span style="left:${Math.random()*100}vw;animation-delay:${Math.random()*0.8}s">${em[i%em.length]}</span>`;}c.innerHTML=h;setTimeout(()=>c.innerHTML='',3600);}
+
+/* ---------- Tabs & keys ---------- */
+function show(tab){
+  ['challenge','cards','pairs','quiz'].forEach(t=>{document.getElementById('tab-'+t).setAttribute('aria-selected',t===tab);document.getElementById(t).hidden=t!==tab;});
+  if(tab==='cards')renderCards();else if(tab==='pairs')renderPairs();else if(tab==='quiz')renderQuiz();
+  window.scrollTo(0,0);
+}
+document.getElementById('tab-challenge').onclick=()=>show('challenge');
+document.getElementById('tab-cards').onclick=()=>show('cards');
+window.addEventListener('message',e=>{const d=e.data||{};if(d.h)document.getElementById('qframe').style.height=(d.h+8)+'px';if(d.top)window.scrollTo(0,0);if(d.go==='cards')show('cards');});
+document.getElementById('tab-pairs').onclick=()=>show('pairs');
+document.getElementById('tab-quiz').onclick=()=>show('quiz');
+document.addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('button')&&e.key===' '&&!e.target.classList.contains('card')) {if(!quizEl.hidden&&qz&&qz.picked!==null){e.preventDefault();nextQ();}return;}
+  if(!document.getElementById('challenge').hidden)return;
+  if(!pairsEl.hidden){if(e.key==='ArrowRight'){pi=(pi+1)%PAIRS.length;showDiff=false;renderPairs();}else if(e.key==='ArrowLeft'){pi=(pi-1+PAIRS.length)%PAIRS.length;showDiff=false;renderPairs();}return;}
+  if(!cardsEl.hidden){
+    if(e.key===' '){e.preventDefault();flipCard();}
+    else if(cf.flipped&&e.key==='1') answerCard(false);
+    else if(cf.flipped&&e.key==='2') answerCard(true);
+  } else {
+    if(['1','2','3','4'].includes(e.key)) pick(+e.key-1);
+    else if(e.key===' '&&qz&&qz.picked!==null){e.preventDefault();nextQ();}
+  }
+});
+show('challenge');
+</script>
+</body>
+</html>
